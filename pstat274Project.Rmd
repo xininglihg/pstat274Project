@@ -17,11 +17,13 @@ tail(data)
 
 But we have to be careful, not all dates are recorded!!!
 
+The xts is an extension of ts which can capture this feature, we have to do more research on that!
+
+
 ```{r}
 plot(data$unixDates,data$Nadopts,type="l")
 ```
 
-To use xts, we have to have a specific date, then we can have
 
 
 
