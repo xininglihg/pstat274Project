@@ -1,0 +1,66 @@
+---
+title: "PSTAT 274 Project"
+output: html_document
+---
+
+# Time series of sales data from a secret product of a secret company. 
+
+The time series is daily sales data from a secret product of a secret company from its begining until Nov8,2018
+
+
+```{r}
+data =read.csv("secretTimeSeries.csv")
+names(data)=c("unixDates","Nadopts")
+tail(data)
+```
+
+
+But we have to be careful, not all dates are recorded!!!
+
+```{r}
+plot(data$unixDates,data$Nadopts,type="l")
+```
+
+To use xts, we have to have a specific date, then we can have
+
+
+
+
+```{r include=FALSE}
+secretTS = ts(data$Nadopts)
+```
+
+```{r}
+acf(secretTS)
+```
+
+```{r}
+pacf(secretTS)
+```
+
+```{r}
+require(qpcR)
+require(MuMIn)
+minAICp=0
+minAICq=0 
+minAIC = 10000000000000
+for(p in seq(25:40)){
+  print(p)
+  for(q in seq(25:40)){
+    currAIC = AICc( arima(secretTS, order = c(p,0,q), method = "ML")  )
+    if (currAIC<minAIC){
+      minAICp=p
+      minAICq=q
+      minAIC =currAIC
+    }
+    
+  }
+}
+print(minAICp)
+print(minAICq)
+print(minAIC)
+```
+
+
+
+
