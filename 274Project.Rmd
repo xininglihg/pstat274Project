@@ -1,0 +1,452 @@
+---
+title: "PSTAT 274 Project"
+author: "Carlos Baez"
+date: "November 20, 2018"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(stats)
+library(urca)
+library(car)
+library(forecast)
+require(MASS)
+library(dplyr)
+Rides_DataA <- read_csv("Rides_DataA.csv")
+```
+
+```{r clean-data}
+#Generate CSV to Explore with Kepler.GL
+longrides <- filter(Rides_DataA, distance_travelled >= 50000) %>% dplyr::select(start_location_lat, start_location_long, end_location_lat, end_location_long, distance_travelled)
+write.csv(longrides, "longrides.csv")
+
+#Filter out data with more than 100,000 m in distance_travelled
+Trip_Data <-filter(Rides_DataA, distance_travelled <= 100000) %>% dplyr::select(start_location_lat, start_location_long, end_location_lat, end_location_long, distance_travelled, started_on, completed_on)
+rm(Rides_DataA)
+```
+
+```{r make-time-series}
+#Hourly 
+Trip_hourly <- Trip_Data %>% mutate(day = as.numeric(date(started_on)), wday = wday(started_on), hour = hour(started_on)) %>% group_by(day, wday, hour) %>% summarize(count = n())
+
+#Get Hours where count is zero
+full_dates <- cbind(rep(16956:17269,each=24),seq(0,23))
+full_dates <-as.data.frame(full_dates)
+full_dates <- full_dates %>% mutate(wday = wday(as_date(V1)))
+Trip_hourly <- full_join(Trip_hourly,full_dates, by = c("day" = "V1", "wday" ="wday", "hour"= "V2"))
+Trip_hourly <- arrange(Trip_hourly, day, hour) %>% mutate(count = ifelse(is.na(count), 0, count))
+write.csv(Trip_hourly,"trip_hourly.csv")
+rm(full_dates)
+
+#Make time series
+trip_H <- ts(Trip_hourly)[,4]
+```
+#Exploring Data
+```{r explore-std, echo=FALSE}
+
+#Time Series Stats
+  ##png("tspolt_trip_H.png") 
+  plot.ts(trip_H, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin")
+  ##dev.off()
+  
+  #Summary Stats
+  ts_mean <- mean(trip_H) 
+  ts_var <- var(trip_H)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H, lag.max = 175)
+  pacf(trip_H, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.png")
+  qqnorm(trip_H)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts_mean`$
+
+$\sigma^2 = `r ts_var`$
+
+##Differencing
+### d(1) Hour Differencing
+```{r diff-1, echo=FALSE}
+#24 Hour differencing
+  trip_H.d.1 <- diff(trip_H, 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.png") 
+  plot.ts(trip_H.d.1, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1_mean <- mean(trip_H.d.1) 
+  ts.d.1_var <- var(trip_H.d.1)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1, lag.max = 175)
+  pacf(trip_H.d.1, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.png")
+  qqnorm(trip_H.d.1)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1_mean`$
+
+$\sigma^2 = `r ts.d.1_var`$
+
+### D(24) Hour Differencing
+```{r diff-24, echo=FALSE}
+#24 Hour differencing
+  trip_H.d.24 <- diff(trip_H, lag = 24, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.png") 
+  plot.ts(trip_H.d.24, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin D(24)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.24_mean <- mean(trip_H.d.24) 
+  ts.d.24_var <- var(trip_H.d.24)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.24, lag.max = 175)
+  pacf(trip_H.d.24, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.png")
+  qqnorm(trip_H.d.24)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.24_mean`$
+
+$\sigma^2 = `r ts.d.24_var`$
+
+### D(168) Hour Differencing
+```{r diff-168, echo=FALSE}
+#168 Hour differencing
+  trip_H.d.168 <- diff(trip_H,lag = 168, differences = 1) #Note 24 hours between days and 168 hours between weeks (same hour)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.168.png") 
+  plot.ts(trip_H.d.168, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin D(168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.168_mean <- mean(trip_H.d.168) 
+  ts.d.168_var <- var(trip_H.d.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.168, lag.max = 175)
+  pacf(trip_H.d.168, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.168.png")
+  qqnorm(trip_H.d.168)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.168_mean`$
+
+$\sigma^2 = `r ts.d.168_var`$
+
+### D(24,168) hour differencing
+```{r diff-24-168, echo=FALSE}
+#24 and 168 hour differencing
+  trip_H.d.24.168 <- diff(trip_H.d.24, lag = 168, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.24.168, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin D(24,168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.24.168_mean <- mean(trip_H.d.24.168) 
+  ts.d.24.168_var <- var(trip_H.d.24.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.24.168, lag.max = 175)
+  pacf(trip_H.d.24.168, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.24.168)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.24.168_mean`$
+
+$\sigma^2 = `r ts.d.24.168_var`$
+
+### d(1) and D(168) hour differencing
+```{r diff-1-168, echo=FALSE}
+#d(1) and d(168) hour differencing
+  trip_H.d.1.168 <- diff(diff(trip_H, 1), lag = 168, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.1.168, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1) & D(168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1.168_mean <- mean(trip_H.d.1.168) 
+  ts.d.1.168_var <- var(trip_H.d.1.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1.168, lag.max = 175)
+  pacf(trip_H.d.1.168, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.1.168)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1.168_mean`$
+
+$\sigma^2 = `r ts.d.1.168_var`$
+
+### d(1) and D(24) hour differencing
+```{r diff-1-24, echo=FALSE}
+#d(1) and d(24) hour differencing
+  trip_H.d.1.24 <- diff(diff(trip_H, 1), lag = 24, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.1.24, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1) & D(24)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1.24_mean <- mean(trip_H.d.1.24) 
+  ts.d.1.24_var <- var(trip_H.d.1.24)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1.24, lag.max = 175)
+  pacf(trip_H.d.1.24, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.1.24)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1.24_mean`$
+
+$\sigma^2 = `r ts.d.1.24_var`$
+
+### d(1) and D(24,168) hour differencing
+```{r diff-1-24-168, echo=FALSE}
+#d(1) and D(24,168) hour differencing
+  trip_H.d.1.24.168 <- diff(diff(diff(trip_H, 1), lag = 24, differences = 1), lag =168, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.1.24.168, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1) & D(24,168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1.24.168_mean <- mean(trip_H.d.1.24.168) 
+  ts.d.1.24.168_var <- var(trip_H.d.1.24.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1.24.168, lag.max = 175)
+  pacf(trip_H.d.1.24.168, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.1.24.168)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1.24.168_mean`$
+
+$\sigma^2 = `r ts.d.1.24.168_var`$
+
+### d(1,24) and D(168) hour differencing
+```{r diff-1-24-168a, echo=FALSE}
+#d(1,24) and d(168) hour differencing
+  trip_H.d.1.24.168a <- diff(diff(diff(trip_H, 1), 24), lag =168, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.1.24.168a, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1,24) & D(168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1.24.168a_mean <- mean(trip_H.d.1.24.168a) 
+  ts.d.1.24.168a_var <- var(trip_H.d.1.24.168a)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1.24.168a, lag.max = 175)
+  pacf(trip_H.d.1.24.168a, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.1.24.168a)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1.24.168a_mean`$
+
+$\sigma^2 = `r ts.d.1.24.168a_var`$
+
+### d(1,12) and D(168) hour differencing
+```{r diff-1-12-168, echo=FALSE}
+#d(1,12) and d(168) hour differencing
+  trip_H.d.1.12.168 <- diff(diff(diff(trip_H, 1),12), lag = 168, differences = 1)
+  
+  #Time Series Stats
+  ##png("tspolt_trip_H.d.24.168.png") 
+  plot.ts(trip_H.d.1.12.168, xlab = "Hour", ylab = "Trip Count", main = "Hourly Trips provided by RideAustin d(1,12) & D(168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.d.1.12.168_mean <- mean(trip_H.d.1.12.168) 
+  ts.d.1.12.168_var <- var(trip_H.d.1.12.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.d.1.12.168, lag.max = 175)
+  pacf(trip_H.d.1.12.168, lag.max = 175)
+  par(op)
+  ##dev.off()
+  
+  #QQ plot
+  ##png("qqpolt_trip_H.d.24.168.png")
+  qqnorm(trip_H.d.1.12.168)
+  abline(0,1)
+  ##dev.off()
+```
+
+$\mu = `r ts.d.1.12.168_mean`$
+
+$\sigma^2 = `r ts.d.1.12.168_var`$
+
+##Transformations
+###Box-Cox Transformation (lambda = 0.23)
+```{r boxcox, echo=FALSE}
+#Find parameter
+  tc.bc <- powerTransform(trip_H ~ 1, family="yjPower")
+  summary(tc.bc)
+
+#Apply Transformation
+  trip_H.t <- (trip_H)^(0.23)
+  
+#Time Series Stats
+  ##png("tspolt_trip_H.t.png") 
+  plot.ts(trip_H.t, xlab = "Hour", ylab = "BOXCOX(Trip Count)", main = "Hourly Trips provided by RideAustin")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.t_mean <- mean(trip_H.t)
+  ts.t_var <- var(trip_H.t)
+
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.t.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.t, lag.max = 350)
+  pacf(trip_H.t, lag.max = 350)
+  par(op)
+  ##dev.off()
+
+  #QQ plot
+  ##png("qqpolt_trip_H.t.png")
+  qqnorm(trip_H.t)
+  abline(0,1)
+ ## dev.off()
+
+#Apply Differencing
+  trip_H.t.d.1.168 <- diff(diff(trip_H.t,1), lag = 168, differences = 1)  
+
+#Stats and Plots
+  #Time Series Plot
+  ##png("tspolt_trip_H.t.d.24.168.png") 
+  plot.ts(trip_H.t.d.1.168, xlab = "Hour", ylab = "BOXCOX(Trip Count)",main = "Hourly Trips provided by RideAustin D(24,168)")
+  ##dev.off()
+  
+  #Summary Stats
+  ts.t.d.1.168_mean <- mean(trip_H.t.d.1.168) 
+  ts.t.d.1.168_var <- var(trip_H.t.d.1.168)
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.t.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.t.d.1.168, lag.max = 25)
+  pacf(trip_H.t.d.1.168, lag.max = 350)
+  par(op)
+  ##dev.off()
+
+  #QQ plot
+  ##png("qqpolt_trip_H.t.d.24.168.png")
+  qqnorm(trip_H.t.d.1.168)
+  abline(0,1)
+ ## dev.off()
+  
+```
+
+Before Differencing:
+
+$\mu = `r ts.t_mean`$
+
+$\sigma^2 = `r ts.t_var`$
+
+After Differencing:
+
+$\mu = `r ts.t.d.1.168_mean`$
+
+$\sigma^2 = `r ts.t.d.1.168_var`$
+
+
