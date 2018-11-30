@@ -407,35 +407,196 @@ $\sigma^2 = `r ts.d.1.12.168_var`$
   qqnorm(trip_H.t)
   abline(0,1)
  ## dev.off()
-
-#Apply Differencing
-  trip_H.t.d.1.168 <- diff(diff(trip_H.t,1), lag = 168, differences = 1)  
-
-#Stats and Plots
-  #Time Series Plot
-  ##png("tspolt_trip_H.t.d.24.168.png") 
-  plot.ts(trip_H.t.d.1.168, xlab = "Hour", ylab = "BOXCOX(Trip Count)",main = "Hourly Trips provided by RideAustin D(24,168)")
-  ##dev.off()
-  
-  #Summary Stats
-  ts.t.d.1.168_mean <- mean(trip_H.t.d.1.168) 
-  ts.t.d.1.168_var <- var(trip_H.t.d.1.168)
-  
-  #ACF and PACF Plots
-  ##png("ACFpolt_trip_H.t.d.24.168.png")
-  op <- par(mfrow=c(1,2))
-  acf(trip_H.t.d.1.168, lag.max = 25)
-  pacf(trip_H.t.d.1.168, lag.max = 350)
-  par(op)
-  ##dev.off()
-
-  #QQ plot
-  ##png("qqpolt_trip_H.t.d.24.168.png")
-  qqnorm(trip_H.t.d.1.168)
-  abline(0,1)
- ## dev.off()
-  
 ```
+
+##Differencing
+```{r differencing}
+#Apply Differencing
+  #d(1)
+  trip_H.t.d.1 <- diff(trip_H.t,1)
+  trip_H.t.d.6 <- diff(trip_H.t,6)
+  trip_H.t.d.12 <- diff(trip_H.t,12)
+  trip_H.t.d.24 <- diff(trip_H.t,24)
+  trip_H.t.d.168 <- diff(trip_H.t,168)
+  
+  #d(1) & D(1)
+  trip_H.t.d.1.D.6 <- diff(diff(trip_H.t,1),lag =  6, differences = 1)
+  trip_H.t.d.1.D.12 <- diff(diff(trip_H.t,1),lag =  12, differences = 1)
+  trip_H.t.d.1.D.24 <- diff(diff(trip_H.t,1),lag =  24, differences = 1)
+  trip_H.t.d.1.D.168 <- diff(diff(trip_H.t,1),lag =  168, differences = 1)
+  trip_H.t.d.6.D.12 <- diff(diff(trip_H.t,6),lag =  12, differences = 1)
+  trip_H.t.d.6.D.24 <- diff(diff(trip_H.t,6),lag =  24, differences = 1)
+  trip_H.t.d.6.D.168 <- diff(diff(trip_H.t,6),lag =  168, differences = 1)
+  trip_H.t.d.12.D.24 <- diff(diff(trip_H.t,12),lag =  24, differences = 1)
+  trip_H.t.d.12.D.168 <- diff(diff(trip_H.t,12),lag =  168, differences = 1)
+  trip_H.t.d.24.D.168 <- diff(diff(trip_H.t,24),lag =  168, differences = 1)
+  trip_H.t.d.168.D.12 <- diff(diff(trip_H.t,168),lag =  12, differences = 1)
+  trip_H.t.d.168.D.24 <- diff(diff(trip_H.t,168),lag =  24, differences = 1)
+  
+  #d(1) & D(2)
+  trip_H.t.d.1.D.6.12 <- diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 12, differences = 1)
+  trip_H.t.d.1.D.6.24 <- diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.1.D.6.168 <- diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.D.12.24 <- diff(diff(diff(trip_H.t,1), lag = 12, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.1.D.12.168 <- diff(diff(diff(trip_H.t,1), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.D.24.168 <- diff(diff(diff(trip_H.t,1), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.6.D.12.24 <- diff(diff(diff(trip_H.t,6), lag = 12, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.6.D.12.168 <- diff(diff(diff(trip_H.t,6), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.6.D.24.168 <- diff(diff(diff(trip_H.t,6), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.12.D.24.168 <- diff(diff(diff(trip_H.t,12), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.24.D.12.168 <- diff(diff(diff(trip_H.t,24), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.168.D.12.24 <- diff(diff(diff(trip_H.t,168), lag = 12, differences = 1), lag = 24, differences = 1)
+  
+  #d(1) & D(3)
+  trip_H.t.d.1.D.6.12.24 <- diff(diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 12, differences = 1),lag = 24, differences = 1)
+  trip_H.t.d.1.D.6.12.168 <- diff(diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 12, differences = 1),lag = 168, differences = 1)
+  trip_H.t.d.1.D.6.24.168 <- diff(diff(diff(diff(trip_H.t,1), lag = 6, differences = 1), lag = 24, differences = 1),lag = 168, differences = 1)
+  trip_H.t.d.1.D.12.24.168 <- diff(diff(diff(diff(trip_H.t,1), lag = 12, differences = 1), lag = 24, differences = 1),lag = 168, differences = 1)
+  trip_H.t.d.6.D.12.24.168 <- diff(diff(diff(diff(trip_H.t,6), lag = 12, differences = 1), lag = 24, differences = 1),lag = 168, differences = 1)
+  
+  #d(2) - 10
+  trip_H.t.d.1.6 <- diff(diff(trip_H.t,1),6)
+  trip_H.t.d.1.12 <- diff(diff(trip_H.t,1),12)
+  trip_H.t.d.1.24 <- diff(diff(trip_H.t,1),24)
+  trip_H.t.d.1.168 <- diff(diff(trip_H.t,1),168)
+  trip_H.t.d.6.12 <- diff(diff(trip_H.t,6),12)
+  trip_H.t.d.6.24 <- diff(diff(trip_H.t,6),24)
+  trip_H.t.d.6.168 <- diff(diff(trip_H.t,6),168)
+  trip_H.t.d.12.24 <- diff(diff(trip_H.t,12),24)
+  trip_H.t.d.12.168 <- diff(diff(trip_H.t,12),168)
+  trip_H.t.d.24.168 <- diff(diff(trip_H.t,24),168)
+  
+  
+  #d(2) & D(1)
+  trip_H.t.d.1.6.D.12 <- diff(diff(diff(trip_H.t,1),6), lag = 12, differences = 1)
+  trip_H.t.d.1.6.D.24 <- diff(diff(diff(trip_H.t,1),6), lag = 24, differences = 1)
+  trip_H.t.d.1.6.D.168 <- diff(diff(diff(trip_H.t,1),6), lag = 168, differences = 1)
+  trip_H.t.d.1.12.D.24 <- diff(diff(diff(trip_H.t,1),12), lag = 24, differences = 1)
+  trip_H.t.d.1.12.D.168 <- diff(diff(diff(trip_H.t,1),12), lag = 168, differences = 1)
+  trip_H.t.d.1.24.D.12 <- diff(diff(diff(trip_H.t,1),24), lag = 12, differences = 1)
+  trip_H.t.d.1.24.D.168 <- diff(diff(diff(trip_H.t,1),24), lag = 168, differences = 1)
+  trip_H.t.d.1.168.D.12 <- diff(diff(diff(trip_H.t,1),168), lag = 12, differences = 1)
+  trip_H.t.d.1.168.D.24 <- diff(diff(diff(trip_H.t,1),168), lag = 24, differences = 1)
+  
+  #d(2) & D(2)
+  trip_H.t.d.1.6.D.12.24 <- diff(diff(diff(diff(trip_H.t,1),6), lag = 12, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.1.6.D.12.168 <- diff(diff(diff(diff(trip_H.t,1),6), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.6.D.24.168 <- diff(diff(diff(diff(trip_H.t,1),6), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.12.D.24.168 <- diff(diff(diff(diff(trip_H.t,1),12), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.24.D.12.168 <- diff(diff(diff(diff(trip_H.t,1),24), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.168.D.12.24 <- diff(diff(diff(diff(trip_H.t,1),168), lag = 12, differences = 1), lag = 24, differences = 1)
+  
+  #d(2) & D(3)
+  trip_H.t.d.1.6.D.12.24.168 <- diff(diff(diff(diff(diff(trip_H.t,1),6), lag = 12, differences = 1), lag = 24, differences = 1), lag = 168, differences = 1)
+  
+  #d(3) & D(1)
+  trip_H.t.d.1.6.12.D.24 <- diff(diff(diff(diff(trip_H.t,1),6),12), lag = 24, differences = 1)
+  trip_H.t.d.1.6.12.D.168 <- diff(diff(diff(diff(trip_H.t,1),6),12), lag = 168, differences = 1)
+  trip_H.t.d.1.12.24.D.168 <- diff(diff(diff(diff(trip_H.t,1),12),24), lag = 168, differences = 1)
+  trip_H.t.d.1.12.168.D.24 <- diff(diff(diff(diff(trip_H.t,1),12),168), lag = 24, differences = 1)
+  trip_H.t.d.1.24.168.D.12 <- diff(diff(diff(diff(trip_H.t,1),24),168), lag = 12, differences = 1)
+  
+  #d(3) & D(2)
+  trip_H.t.d.1.6.12.D.12.24 <- diff(diff(diff(diff(diff(trip_H.t,1),6),12), lag = 12, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.1.6.12.D.24.168 <- diff(diff(diff(diff(diff(trip_H.t,1),6),12), lag = 24, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.6.24.D.12.24 <- diff(diff(diff(diff(diff(trip_H.t,1),6),24), lag = 12, differences = 1), lag = 24, differences = 1)
+  trip_H.t.d.1.6.24.D.12.168 <- diff(diff(diff(diff(diff(trip_H.t,1),6),24), lag = 12, differences = 1), lag = 168, differences = 1)
+  trip_H.t.d.1.6.168.D.12.24 <- diff(diff(diff(diff(diff(trip_H.t,1),6),168), lag = 12, differences = 1), lag = 24, differences = 1)
+ 
+#Summary Stats  
+ #d(1) -5
+  ts.t.d.1_var <- var(trip_H.t.d.1)
+  ts.t.d.6_var <- var(trip_H.t.d.6)
+  ts.t.d.12_var <- var(trip_H.t.d.12)
+  ts.t.d.24_var <- var(trip_H.t.d.24)
+  ts.t.d.168_var <- var(trip_H.t.d.168)
+  
+  #d(1) & D(1) - 13
+  ts.t.d.1.D.6_var <- var(trip_H.t.d.1.D.6)
+  ts.t.d.1.D.12_var <- var(trip_H.t.d.1.D.12)
+  ts.t.d.1.D.24_var <- var(trip_H.t.d.1.D.24)
+  ts.t.d.1.D.168_var <- var(trip_H.t.d.1.D.168)
+  ts.t.d.6.D.12_var <- var(trip_H.t.d.1.D.12)
+  ts.t.d.6.D.24_var <- var(trip_H.t.d.1.D.24)
+  ts.t.d.6.D.168_var <- var(trip_H.t.d.1.D.168)
+  ts.t.d.12.D.24_var <- var(trip_H.t.d.1.D.24)
+  ts.t.d.12.D.168_var <- var(trip_H.t.d.1.D.168)
+  ts.t.d.24.D.12_var <- var(trip_H.t.d.1.D.12)
+  ts.t.d.24.D.168_var <- var(trip_H.t.d.1.D.168)
+  ts.t.d.168.D.12_var <- var(trip_H.t.d.1.D.12)
+  ts.t.d.168.D.24_var <- var(trip_H.t.d.1.D.24)
+  
+  #d(1) & D(2) - 12
+  ts.t.d.1.D.6.12_var <- var(trip_H.t.d.1.D.6.12)
+  ts.t.d.1.D.6.24_var <- var(trip_H.t.d.1.D.6.24)
+  ts.t.d.1.D.6.168_var <- var(trip_H.t.d.1.D.6.168)
+  ts.t.d.1.D.12.24_var <- var(trip_H.t.d.1.D.12.24)
+  ts.t.d.1.D.12.168_var <- var(trip_H.t.d.1.D.12.168)
+  ts.t.d.1.D.24.168_var <- var(trip_H.t.d.1.D.24.168)
+  ts.t.d.6.D.12.24_var <- var(trip_H.t.d.6.D.12.24)
+  ts.t.d.6.D.12.168_var <- var(trip_H.t.d.6.D.12.168)
+  ts.t.d.6.D.24.168_var <- var(trip_H.t.d.6.D.24.168)
+  ts.t.d.12.D.24.168_var <- var(trip_H.t.d.12.D.24.168)
+  ts.t.d.24.D.12.168_var <- var(trip_H.t.d.24.D.12.168)
+  ts.t.d.168.D.12.24_var <- var(trip_H.t.d.168.D.12.24)
+  
+  #d(1) & D(3) - 5
+  ts.t.d.1.D.6.12.24_var <- var(trip_H.t.d.1.D.6.12.24)
+  ts.t.d.1.D.6.12.168_var <- var(trip_H.t.d.1.D.6.12.168)
+  ts.t.d.1.D.6.24.168_var <- var(trip_H.t.d.1.D.6.24.168)
+  ts.t.d.1.D.12.24.168_var <- var(trip_H.t.d.1.D.12.24.168)
+  ts.t.d.6.D.12.24.168_var <- var(trip_H.t.d.6.D.12.24.168)
+  
+  #d(2)
+  ts.t.d.1.6_var <- var(trip_H.t.d.1.6) 
+  ts.t.d.1.12_var <- var(trip_H.t.d.1.12) 
+  ts.t.d.1.24_var <- var(trip_H.t.d.1.24)
+  ts.t.d.1.168_var <- var(trip_H.t.d.1.168)
+  ts.t.d.6.12_var <- var(trip_H.t.d.6.12) 
+  ts.t.d.6.24_var <- var(trip_H.t.d.6.24)
+  ts.t.d.6.168_var <- var(trip_H.t.d.6.168) 
+  ts.t.d.12.24_var <- var(trip_H.t.d.12.24) 
+  ts.t.d.12.168_var <- var(trip_H.t.d.12.168) 
+  ts.t.d.24.168_var <- var(trip_H.t.d.24.168) 
+  
+  #d(2) & D(1)
+  ts.t.d.1.6.D.12 <- var(trip_H.t.d.1.6.D.12) 
+  ts.t.d.1.6.D.24 <- var(trip_H.t.d.1.6.D.24) 
+  ts.t.d.1.6.D.168 <- var(trip_H.t.d.1.6.D.168)
+  ts.t.d.1.12.D.24 <- var(trip_H.t.d.1.12.D.24) 
+  ts.t.d.1.12.D.168 <- var(trip_H.t.d.1.12.D.168) 
+  ts.t.d.1.24.D.12 <- var(trip_H.t.d.1.24.D.12) 
+  ts.t.d.1.24.D.168 <- var(trip_H.t.d.1.24.D.168)
+  ts.t.d.1.168.D.12 <- var(trip_H.t.d.1.168.D.12)
+  ts.t.d.1.168.D.24 <- var(trip_H.t.d.1.168.D.24) 
+  
+  #d(2) & D(2)
+  var(trip_H.t.d.1.6.D.12.24) 
+  var(trip_H.t.d.1.6.D.12.168) 
+  var(trip_H.t.d.1.6.D.24.168) 
+  var(trip_H.t.d.1.12.D.24.168) 
+  var(trip_H.t.d.1.24.D.12.168) 
+  var(trip_H.t.d.1.168.D.12.24) 
+  
+  #d(2) & D(3)
+  var(trip_H.t.d.1.6.D.12.24.168) 
+  
+  #d(3) & D(1)
+  var(trip_H.t.d.1.6.12.D.24) 
+  var(trip_H.t.d.1.6.12.D.168) 
+  var(trip_H.t.d.1.12.24.D.168) 
+  var(trip_H.t.d.1.12.168.D.24) 
+  var(trip_H.t.d.1.24.168.D.12) 
+  
+  #d(3) & D(2)
+  var(trip_H.t.d.1.6.12.D.12.24) 
+  var(trip_H.t.d.1.6.12.D.24.168)
+  var(trip_H.t.d.1.6.24.D.12.24) 
+  var(trip_H.t.d.1.6.24.D.12.168) 
+  var(trip_H.t.d.1.6.168.D.12.24)
+```
+
+
 
 Before Differencing:
 
@@ -443,10 +604,75 @@ $\mu = `r ts.t_mean`$
 
 $\sigma^2 = `r ts.t_var`$
 
-After Differencing:
+After Differencing with d(1) and D(168):
 
 $\mu = `r ts.t.d.1.168_mean`$
 
 $\sigma^2 = `r ts.t.d.1.168_var`$
 
+##Examine Selected Time Series 
+```{r ts-stats}
+#Plots for Best TS
+  #Time Series Plot
+  ##png("tspolt_trip_H.t.d.24.168.png") 
+  plot.ts(trip_H.t.d.1.D.168, xlab = "Hour", ylab = "BOXCOX(Trip Count)",main = "Hourly Trips provided by RideAustin d(1) and D(168)")
+  ##dev.off()
+  
+  #ACF and PACF Plots
+  ##png("ACFpolt_trip_H.t.d.24.168.png")
+  op <- par(mfrow=c(1,2))
+  acf(trip_H.t.d.1.D.168, lag.max = 30)
+  pacf(trip_H.t.d.1.D.168, lag.max = 30)
+  par(op)
+  ##dev.off()
+
+  #QQ plot
+  ##png("qqpolt_trip_H.t.d.24.168.png")
+  qqnorm(trip_H.t.d.1.D.168)
+  abline(0,1)
+ ## dev.off()
+  
+##Check for Stationarity
+  trip_H.t.d.1.D.168 %>% ur.kpss() %>% summary()
+```
+
+With KPSS test, $H_0 : the time series is stationary$. The test statistic indicates that it is unreasonable to reject the null hypothesis. 
+
+#Model Identification
+```{r ARMA-modelID}
+  auto.arima(trip_H.t.d.1.D.168)
+
+  for(i in 12:12){
+    for(j in 12:12){
+      #Set ARIMA Order Parameters 
+      arma_param <- c(i,0,j)
+      print(i); print(j)
+      
+      #Model
+      print(arima(trip_H.t.d.1.D.168, order = arma_param))
+    }
+  }
+
+  #Candidate ARMA Models
+  ARMA_canmodels <- list(c(3,0,6),
+                      c(4,0,3),
+                      c(,0,),c(,0,),
+                      c(,0,),c(,0,),
+                      c(7,0,8),c(7,0,9),c(7,0,10),c(7,0,11),
+                      c(8,0,3),c(8,0,4),c(8,0,6),c(8,0,7),c(8,0,8),c(8,0,9),c(8,0,10),c(8,0,11),
+                      c(9,0,7),c(9,0,8),c(9,0,9),c(9,0,10),c(9,0,11),c(9,0,12),
+                      c(10,0,),
+                      c(11,0,),
+                      c(12,0,),)
+  
+  #Check AICc
+  for(i in ARMA_models){
+    print("AICc = ")
+    print(AICc(arima(trip_H.t.d.1.D.168, order = ARMA_canmodels[i])))
+    print("")
+    
+  }
+  
+```
+auto.arima suggested a ARMA(2,0,2) model with sigma^2 estimated as 0.07151 and AIC=1480.13   AICc=1480.14   BIC=1514.65
 
