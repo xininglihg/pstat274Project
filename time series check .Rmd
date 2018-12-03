@@ -1,0 +1,56 @@
+---
+title: "274 check"
+author: "Zian He"
+date: "2018/12/2"
+output: html_document
+---
+
+
+```{r}
+library(moments)
+library(tseries)
+
+```
+
+```{r}
+# keep initial 0s 
+df <- read.csv("trip_H.t.d.1.D.168.csv", header=TRUE)
+head(df)
+x <- df[, "x"]
+
+```
+
+```{r}
+# skewness
+skewness(x)
+
+```
+
+```{r}
+# kurtosis
+kurtosis(x)
+```
+
+```{r}
+# normality :
+# Jaque-Bera
+jarque.bera.test(x)
+```
+
+```{r}
+# Shapiro wilk (sample size between 3 to 5000)
+shapiro.test(x[1:5000])
+shapiro.test(x[5001:7367])
+```
+
+```{r}
+# Kolmogorov-Smirnov test
+ks.test(x, "pnorm", mean(x), sd(x))
+```
+
+```{r}
+# Independence: 
+# ljung box test
+Box.test(x, lag=1, type="Ljung-Box")
+```
+
